@@ -26,7 +26,13 @@ include("tcp/ssl.pri")
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    client.cpp \
+    server.cpp \
+    certificaat.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    client.h \
+    server.h \
+    certificaat.h

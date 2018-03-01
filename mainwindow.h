@@ -3,13 +3,17 @@
 
 #include <QMainWindow>
 #include <QDebug>
-#include <QProcess>
 #include <QMenu>
 #include <QMenuBar>
 #include <QMdiArea>
 #include <QMdiSubWindow>
 #include <QMessageBox>
 #include <QApplication>
+#include <QStatusBar>
+
+#include "certificaat.h"
+#include "client.h"
+#include "server.h"
 
 class MainWindow : public QMainWindow
 {
@@ -18,7 +22,12 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
+
+public slots:
 private:
+    certificaat *my_certificaat;
+    client *my_client;
+    server *my_server;
     QMdiArea *mdiArea;
 
     void createActions();
@@ -32,20 +41,14 @@ private:
             *action_client,
             *action_server,
             *aboutQtAct;
+    QMenu *windowMenu;
+    void add_window_action(QWidget *widget);
 
-    QProcess run_openssl;
-    QString Land="";
-    QString Staat="";
-    QString Gebied="";
-    QString Organisatie="";
-    QString Organisatieonderdeel="";
-    QString Algemene_naam="test";
 
 private slots:
-    void setup_Gui_client();
-    void setup_Gui_server();
-    void setup_Gui_certificaat();
-    void setup_certificaat();
+    void Gui_client();
+    void Gui_server();
+    void Gui_certificaat();
 };
 
 #endif // MAINWINDOW_H

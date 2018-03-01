@@ -12,6 +12,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     createActions();
     createMenus();
+    statusBar()->showMessage(tr("ok"), 500);
 }
 
 MainWindow::~MainWindow()
@@ -26,15 +27,15 @@ void MainWindow::createActions()
 
     action_certificaat = new QAction(tr("&certificaat"), this);
     action_certificaat->setStatusTip(tr("setup certificaat"));
-    connect(action_certificaat, &QAction::triggered, this, &MainWindow::setup_Gui_certificaat);
+    connect(action_certificaat, &QAction::triggered, this, &MainWindow::Gui_certificaat);
 
     action_client = new QAction(tr("&client"), this);
     action_client->setStatusTip(tr("setup client"));
-    connect(action_client, &QAction::triggered, this, &MainWindow::setup_Gui_client);
+    connect(action_client, &QAction::triggered, this, &MainWindow::Gui_client);
 
     action_server = new QAction(tr("&server"), this);
     action_server->setStatusTip(tr("setup server"));
-    connect(action_server, &QAction::triggered, this, &MainWindow::setup_Gui_server);
+    connect(action_server, &QAction::triggered, this, &MainWindow::Gui_server);
 
     action_Exit = new QAction(tr("&Exit"), this);
     action_Exit->setStatusTip(tr("Exit the program"));
@@ -72,38 +73,55 @@ void MainWindow::createMenus()
     menu_File->addAction(action_server);
     menu_File->addAction(action_Exit);
 
-    QMenu *windowMenu = menuBar()->addMenu(tr("&Window"));
+    windowMenu = menuBar()->addMenu(tr("&Window"));
     windowMenu->addAction(tileAct);
     windowMenu->addAction(cascadeAct);
     windowMenu->addSeparator();
     windowMenu->addAction(closeAct);
     windowMenu->addAction(closeAllAct);
+    windowMenu->addSeparator();
 
     QMenu *helpMenu = menuBar()->addMenu(tr("&help"));
     helpMenu->addAction(aboutQtAct);
 
 }
 
-void MainWindow::setup_Gui_client()
+void MainWindow::add_window_action(QWidget *widget)
 {
-    qDebug()<<this<<"setup_Gui_client";
+    QAction *widgetAct = new QAction(widget->windowTitle(), this);
+    connect(widgetAct, SIGNAL(triggered()),
+            widget, SLOT(showMaximized()));
+    connect(widget, SIGNAL(destroyed(QObject*)),
+            widgetAct, SLOT(deleteLater()));
+    windowMenu->addAction(widgetAct);
 
 }
 
-void MainWindow::setup_Gui_server()
+void MainWindow::Gui_client()
 {
-    qDebug()<<this<<"setup_Gui_server";
+    qDebug()<<this<<"Gui_client";
+    my_client= new client(this);
+    mdiArea->addSubWindow(my_client);
+    add_window_action(my_client);
+    my_client->show();
 
 }
 
-void MainWindow::setup_Gui_certificaat()
+void MainWindow::Gui_server()
 {
-    qDebug()<<this<<"setup_Gui_certificaat";
+    qDebug()<<this<<"Gui_server";
+    my_server= new server(this);
+    mdiArea->addSubWindow(my_server);
+    add_window_action(my_server);
+    my_server->show();
+
 }
 
-void MainWindow::setup_certificaat()
+void MainWindow::Gui_certificaat()
 {
-    qDebug()<<this<<"setup_certificaat";
-
-    run_openssl.start("openssl req -nodes -newkey rsa:4096 -keyout test.key -x509 -days 365 -out test.crt -subj \"/C="+Land+"/ST="+Staat+"/L="+Gebied+"/O="+Organisatie+"/OU="+Organisatieonderdeel+"/CN="+Algemene_naam+"\"");
+    qDebug()<<this<<"Gui_certificaat";
+    my_certificaat=new certificaat(this);
+    mdiArea->addSubWindow(my_certificaat);
+    add_window_action(my_certificaat);
+    my_certificaat->show();
 }
