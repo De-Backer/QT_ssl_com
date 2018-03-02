@@ -7,6 +7,9 @@
 #include <QDebug>
 #include <QPushButton>
 #include <QLineEdit>
+#include <QPointer>
+#include <QDir>
+#include <QFileDialog>
 
 class certificaat : public QWidget
 {
@@ -34,9 +37,14 @@ private:
     QString Organisatieonderdeel="";
     QString Algemene_naam="test";
 
+    QString File_crt="test.crt";
+    QString File_key="test.key";
+
 private slots:
     void setup_certificaat();
     void ProcesstateChanged();
+    void set_File_crt();
+    void set_File_key();
 
 };
 
