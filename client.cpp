@@ -5,13 +5,13 @@ client::client(QWidget *parent) : QWidget(parent)
     qDebug()<<this<<"created";
     setWindowTitle(tr("client"));
 
-    my_ssl = new ssl(this);
-    connect(my_ssl, &ssl::Connect_Descriptor, this, &client::set_Descriptor);
-    connect(my_ssl, &ssl::message, this, &client::get_message);
-    connect(this, &client::sent_message, my_ssl, &ssl::sent_message);
+    my_ssl = new ssl_socket(this);
+    connect(my_ssl, &ssl_socket::Connect_Descriptor, this, &client::set_Descriptor);
+    connect(my_ssl, &ssl_socket::message, this, &client::get_message);
+    connect(this, &client::sent_message, my_ssl, &ssl_socket::sent_message);
 
     connect_to_server =new QPushButton(tr("&Connect"),this);
-    connect_to_server->setCheckable(true);;
+    connect_to_server->setCheckable(true);
     connect(connect_to_server, SIGNAL(toggled(bool)),this,SLOT(on_PB_connect_to_server_toggled(bool)));
 
     port=new QSpinBox(this);
@@ -60,7 +60,7 @@ void client::set_Descriptor(qintptr Descriptor)
 void client::get_message(qintptr Descriptor, QByteArray data)
 {
     descriptor=Descriptor;
-    ontvangen->setText(ontvangen->toPlainText()+"/n"+QString().fromUtf8(data));
+    ontvangen->setText(ontvangen->toPlainText()+"\n"+QString().fromUtf8(data));
 }
 
 void client::set_folder_crt()
@@ -76,15 +76,20 @@ void client::on_PB_connect_to_server_toggled(bool is)
     qDebug()<<this<<"on_PB_connect_to_server_toggled"<<is;
     if(is)
     {
-        connect_to_server->setText(tr("&disconnect"));
-        zend_to_server->setEnabled(true);
-        IP->setEnabled(false);
-        port->setEnabled(false);
-        CN->setEnabled(false);
 
         //start de com
         my_ssl->SetCaCertificates(folder_crt);
-        my_ssl->Connect(IP->text(),port->value(),CN->text());
+        if(my_ssl->Connect(IP->text(),port->value(),CN->text()))
+        {
+            //Connect
+            connect_to_server->setText(tr("&disconnect"));
+            zend_to_server->setEnabled(true);
+            IP->setEnabled(false);
+            port->setEnabled(false);
+            CN->setEnabled(false);
+        } else {
+            connect_to_server->setText(tr("&Connect failed"));
+        }
 
     } else {
         connect_to_server->setText(tr("&Connect"));

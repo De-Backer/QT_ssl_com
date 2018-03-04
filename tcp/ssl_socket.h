@@ -10,27 +10,37 @@
 
 #include <QHostAddress>
 
-class ssl : public QObject
+class ssl_socket : public QObject
 {
     Q_OBJECT
 public:
-    explicit ssl(QObject *parent = nullptr);
+    // all
+    explicit ssl_socket(QObject *parent = nullptr);
+
+    // client of all(-en server?)
     bool Connect(QString IP, int port,QString sslPeerName);
-    void Connect(QString IP, int port,QString sslPeerName, QByteArray data);
-    void SetSocket(qintptr Descriptor);
     void SetCaCertificates(QString file);
+
+    // server
+    void SetSocket(qintptr Descriptor);
     void SetLocalCertificate(QString file);
     void SetPrivateKey(QString file);
 
 signals:
+    // all
     void message(qintptr Descriptor,QByteArray data);
+
+    // client
     void Connect_Descriptor(qintptr Descriptor);
 
 public slots:
-    void sent_message(qintptr Descriptor,QByteArray data);
-    void disconnect(qintptr Descriptor);
+    // all
+    virtual void sent_message(qintptr Descriptor,QByteArray data);
+    // client of all(-en server?)
+    virtual void disconnect(qintptr Descriptor);
 
 private:
+    // all
     QSslSocket *socket;
 
 private slots:
