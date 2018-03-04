@@ -63,6 +63,11 @@ void server::message(qintptr Descriptor, QByteArray data)
 
 }
 
+void server::disconnected(qintptr Descriptor)
+{
+    qDebug()<<this<<"disconnected"<<Descriptor;
+}
+
 void server::set_File_crt()
 {
     qDebug()<<this<<"set_File_crt";
@@ -88,6 +93,7 @@ void server::on_PB_run_toggled(bool is)
     {
         PB_run->setText(tr("&stop"));
         tcp_server *my_tcp_server = new tcp_server();//no parent
+        connect(my_tcp_server,&tcp_server::disconnected,this,&server::disconnected,Qt::QueuedConnection);
         connect(my_tcp_server,&tcp_server::message,this,&server::message,Qt::QueuedConnection);
         connect(this,&server::sent_message,my_tcp_server,&tcp_server::sent_message,Qt::QueuedConnection);
         my_tcp_server->StartServer(port->value(),File_crt,File_key);
@@ -100,6 +106,8 @@ void server::on_PB_run_toggled(bool is)
     } else {
         PB_run->setText(tr("&run"));
         zend_to_client->setEnabled(false);
+
+        qDebug()<<this<<"on_PB_run_toggled ToDo stop server";
     }
 }
 

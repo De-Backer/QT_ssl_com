@@ -1,5 +1,5 @@
-#ifndef SSL_H
-#define SSL_H
+#ifndef SSL_SERVER_SOCKET_H
+#define SSL_SERVER_SOCKET_H
 
 #include <QObject>
 #include <QDebug>
@@ -10,37 +10,26 @@
 
 #include <QHostAddress>
 
-class ssl_socket : public QObject
+class ssl_server_socket : public QObject
 {
     Q_OBJECT
 public:
-    // all
-    explicit ssl_socket(QObject *parent = nullptr);
+    explicit ssl_server_socket(QObject *parent = nullptr);
+    ~ssl_server_socket();
 
-    // client of all(-en server?)
-    bool Connect(QString IP, int port,QString sslPeerName);
-    void SetCaCertificates(QString file);
-
-    // server
     void SetSocket(qintptr Descriptor);
     void SetLocalCertificate(QString file);
     void SetPrivateKey(QString file);
 
 signals:
-    // all
     void message(qintptr Descriptor,QByteArray data);
+    void is_disconnected(qintptr Descriptor);
 
-    // client
-    void Connect_Descriptor(qintptr Descriptor);
 
 public slots:
-    // all
     virtual void sent_message(qintptr Descriptor,QByteArray data);
-    // client of all(-en server?)
-    virtual void disconnect(qintptr Descriptor);
 
-private:
-    // all
+protected:
     QSslSocket *socket;
 
 private slots:
@@ -48,7 +37,6 @@ private slots:
     void Encrypted();
     void disconnected();
     void sslErrors(const QList<QSslError> &errors);
-
 };
 
-#endif // SSL_H
+#endif // SSL_SERVER_SOCKET_H

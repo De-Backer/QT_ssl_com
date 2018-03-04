@@ -30,6 +30,7 @@ signals:
 
 public slots:
     virtual void message(qintptr Descriptor,QByteArray data);
+    virtual void disconnected(qintptr Descriptor);
 
 private:
     QPushButton *PB_run;
@@ -42,7 +43,7 @@ private:
     QLabel *L_File_crt;
     QLabel *L_File_key;
 
-    qintptr descriptor;
+    qintptr descriptor=0;
 
 private slots:
     void set_File_crt();

@@ -5,11 +5,6 @@ client::client(QWidget *parent) : QWidget(parent)
     qDebug()<<this<<"created";
     setWindowTitle(tr("client"));
 
-    my_ssl = new ssl_socket(this);
-    connect(my_ssl, &ssl_socket::Connect_Descriptor, this, &client::set_Descriptor);
-    connect(my_ssl, &ssl_socket::message, this, &client::get_message);
-    connect(this, &client::sent_message, my_ssl, &ssl_socket::sent_message);
-
     connect_to_server =new QPushButton(tr("&Connect"),this);
     connect_to_server->setCheckable(true);
     connect(connect_to_server, SIGNAL(toggled(bool)),this,SLOT(on_PB_connect_to_server_toggled(bool)));
@@ -76,7 +71,11 @@ void client::on_PB_connect_to_server_toggled(bool is)
     qDebug()<<this<<"on_PB_connect_to_server_toggled"<<is;
     if(is)
     {
-
+        my_ssl = new ssl_client_socket(this);
+        connect(this, &client::disconnect,my_ssl,&ssl_client_socket::disconnect);
+        connect(my_ssl, &ssl_client_socket::Connect_Descriptor, this, &client::set_Descriptor);
+        connect(my_ssl, &ssl_client_socket::message, this, &client::get_message);
+        connect(this, &client::sent_message, my_ssl, &ssl_client_socket::sent_message);
         //start de com
         my_ssl->SetCaCertificates(folder_crt);
         if(my_ssl->Connect(IP->text(),port->value(),CN->text()))
@@ -89,6 +88,10 @@ void client::on_PB_connect_to_server_toggled(bool is)
             CN->setEnabled(false);
         } else {
             connect_to_server->setText(tr("&Connect failed"));
+
+            qDebug()<<this<<"on_PB_connect_to_server_toggled"<<is<<"0 emit disconnect"<<descriptor;
+            emit disconnect(descriptor);
+            delete my_ssl;
         }
 
     } else {
@@ -98,7 +101,9 @@ void client::on_PB_connect_to_server_toggled(bool is)
         port->setEnabled(true);
         CN->setEnabled(true);
 
-        my_ssl->disconnect(descriptor);
+        qDebug()<<this<<"on_PB_connect_to_server_toggled"<<is<<"1 emit disconnect"<<descriptor;
+        emit disconnect(descriptor);
+        delete my_ssl;
     }
 
 }

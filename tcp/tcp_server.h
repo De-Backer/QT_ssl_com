@@ -4,18 +4,23 @@
 #include <QTcpServer>
 #include <QDebug>
 
-#include "ssl_socket.h"
+#include "ssl_server_socket.h"
 
 class tcp_server : public QTcpServer
 {
     Q_OBJECT
 public:
     explicit tcp_server(QObject *parent = 0);
+    ~tcp_server();
     void StartServer(int port,QString file_crt,QString file_key);
+    virtual void close();
 
 signals:
     void message(qintptr Descriptor,QByteArray data);
     void sent_message(qintptr Descriptor,QByteArray data);
+    void disconnected(qintptr Descriptor);
+    void finished();
+
 
 public slots:
 

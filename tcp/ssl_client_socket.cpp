@@ -1,6 +1,6 @@
-#include "ssl_socket.h"
+#include "ssl_client_socket.h"
 
-ssl_socket::ssl_socket(QObject *parent) : QObject(parent)
+ssl_client_socket::ssl_client_socket(QObject *parent) : QObject(parent)
 {
     qDebug() << this << "created";
     socket = new QSslSocket(this);
@@ -8,14 +8,19 @@ ssl_socket::ssl_socket(QObject *parent) : QObject(parent)
        qWarning("not enough memory to create new QSslSocket");
        return;
     }
-    connect(socket,&QSslSocket::encrypted,this,&ssl_socket::Encrypted);
+    connect(socket,&QSslSocket::encrypted,this,&ssl_client_socket::Encrypted);
     connect(socket, SIGNAL(sslErrors(QList<QSslError>)),this, SLOT(sslErrors(QList<QSslError>)));
-    connect(socket,&QSslSocket::disconnected,this,&ssl_socket::disconnected);
-    connect(socket,&QSslSocket::readyRead,this,&ssl_socket::readyRead);
+    connect(socket,&QSslSocket::disconnected,this,&ssl_client_socket::disconnected);
+    connect(socket,&QSslSocket::readyRead,this,&ssl_client_socket::readyRead);
 
 }
 
-bool ssl_socket::Connect(QString IP, int port, QString sslPeerName)
+ssl_client_socket::~ssl_client_socket()
+{
+    qDebug() << this << "destroyed";
+}
+
+bool ssl_client_socket::Connect(QString IP, int port, QString sslPeerName)
 {
     qDebug() << this << "Connect: " << IP << " at port: " << port << "CN" << sslPeerName;
     //transmiter
@@ -42,25 +47,7 @@ bool ssl_socket::Connect(QString IP, int port, QString sslPeerName)
     return true;
 }
 
-void ssl_socket::SetSocket(qintptr Descriptor)
-{
-    qDebug() << this << "SetSocket" << Descriptor;
-    //reseiver
-
-    /* Emit a message indicating the address of the client. */
-    socket->setSocketDescriptor(Descriptor);
-
-    /* Start the server encryption process and wait for it to complete. */
-    socket->startServerEncryption();
-    if(socket->waitForEncrypted())
-    {
-        if(socket->isEncrypted())qDebug() <<Descriptor << "Session with client is now encrypted.";
-    } else {
-        qDebug() << Descriptor<< tr("An error occurred: %1.").arg(socket->errorString()).toLocal8Bit();
-    }
-}
-
-void ssl_socket::SetCaCertificates(QString file)
+void ssl_client_socket::SetCaCertificates(QString file)
 {
     qDebug() << this << "SetCaCertificates" << file;
     QList<QSslCertificate> trustedCas;
@@ -82,24 +69,7 @@ void ssl_socket::SetCaCertificates(QString file)
 
 }
 
-void ssl_socket::SetLocalCertificate(QString file)
-{
-    qDebug() << this << "SetLocalCertificate" << file;
-    /* Set the certificate */
-    socket->setLocalCertificate(file);
-
-
-}
-
-void ssl_socket::SetPrivateKey(QString file)
-{
-    qDebug() << this << "SetPrivateKey" << file;
-    /* Set the private key. */
-    socket->setPrivateKey(file);
-
-}
-
-void ssl_socket::sent_message(qintptr Descriptor, QByteArray data)
+void ssl_client_socket::sent_message(qintptr Descriptor, QByteArray data)
 {
     qDebug() << this << "sent_message" << Descriptor << data;
     if(socket->socketDescriptor()!=Descriptor) return;
@@ -109,20 +79,22 @@ void ssl_socket::sent_message(qintptr Descriptor, QByteArray data)
     socket->waitForBytesWritten();
 }
 
-void ssl_socket::disconnect(qintptr Descriptor)
+void ssl_client_socket::disconnect(qintptr Descriptor)
 {
     qDebug() << this << "disconnect"<< Descriptor;
     if(socket->socketDescriptor()!=Descriptor) return;
     socket->close();
+    socket->deleteLater();
+    //emit Connect_Descriptor(0);//client
 }
 
-void ssl_socket::readyRead()
+void ssl_client_socket::readyRead()
 {
     qDebug() << this << "readyRead";
     emit message(socket->socketDescriptor(),socket->readAll());
 }
 
-void ssl_socket::Encrypted()
+void ssl_client_socket::Encrypted()
 {
     qDebug() << this << "Encrypted";
     if (!socket) return;                 // might have disconnected already
@@ -132,18 +104,18 @@ void ssl_socket::Encrypted()
                      .arg(ciph.name()).arg(ciph.usedBits()).arg(ciph.supportedBits()).arg(ciph.protocolString());
 }
 
-void ssl_socket::disconnected()
+void ssl_client_socket::disconnected()
 {
     qDebug() << this << "disconnected" <<socket->socketDescriptor()<< "disconnected:"<<socket->errorString();
     /* Close the connection once the data is written. */
     socket->disconnectFromHost();
+    socket->close();
+    socket->deleteLater();
     deleteLater();
-    qDebug() << this << "! TODO: inform client/server of disconnected";
 }
 
-void ssl_socket::sslErrors(const QList<QSslError> &errors)
+void ssl_client_socket::sslErrors(const QList<QSslError> &errors)
 {
-
     qDebug()<<"sslErrors:"<<errors;
     foreach (const QSslError &error, errors)
     {

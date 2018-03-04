@@ -14,7 +14,7 @@
 #include <QFileDialog>
 #include <QLabel>
 
-#include "ssl_socket.h"
+#include "ssl_client_socket.h"
 
 class client : public QWidget
 {
@@ -24,6 +24,7 @@ public:
 
 signals:
     void sent_message(qintptr Descriptor,QByteArray data);
+    void disconnect(qintptr Descriptor);
 
 public slots:
     void set_Descriptor(qintptr Descriptor);
@@ -39,8 +40,8 @@ private:
     QLineEdit *CN;
 
     QString folder_crt=QDir::currentPath();
-    ssl_socket *my_ssl;
-    qintptr descriptor;
+    ssl_client_socket *my_ssl;
+    qintptr descriptor=0;
 
 private slots:
     void set_folder_crt();
