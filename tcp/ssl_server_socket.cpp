@@ -76,6 +76,9 @@ void ssl_server_socket::Encrypted()
     QSslCipher ciph = socket->sessionCipher();
     qDebug()<<QString("%1, %2 (%3/%4) %5").arg(ciph.authenticationMethod())
               .arg(ciph.name()).arg(ciph.usedBits()).arg(ciph.supportedBits()).arg(ciph.protocolString());
+    //inform server of Descriptor
+    emit message(socket->socketDescriptor(),socket->readAll());
+
 }
 
 void ssl_server_socket::disconnected()

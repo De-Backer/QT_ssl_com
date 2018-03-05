@@ -59,7 +59,7 @@ void server::message(qintptr Descriptor, QByteArray data)
 {
     qDebug()<<this<<"message"<<Descriptor<<data;
     descriptor=Descriptor;
-    ontvangen->setText(ontvangen->toPlainText()+"\n"+QString().fromUtf8(data));
+    ontvangen->setText("Descriptor "+QString::number(Descriptor)+": "+QString().fromUtf8(data)+"\n"+ontvangen->toPlainText());
 
 }
 
@@ -113,7 +113,7 @@ void server::on_PB_run_toggled(bool is)
 
 void server::on_PB_zend_to_client()
 {
-    qDebug()<<this<<"on_PB_zend_to_client";
+    qDebug()<<this<<"on_PB_zend_to_client"<<"ToDo de descriptor is het beperkende element bij meerder clienten";
     // zend data
     emit sent_message(descriptor,verzenden->toPlainText().toLocal8Bit());
     // clear

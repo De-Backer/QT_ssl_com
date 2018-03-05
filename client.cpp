@@ -55,7 +55,7 @@ void client::set_Descriptor(qintptr Descriptor)
 void client::get_message(qintptr Descriptor, QByteArray data)
 {
     descriptor=Descriptor;
-    ontvangen->setText(ontvangen->toPlainText()+"\n"+QString().fromUtf8(data));
+    ontvangen->setText("Descriptor "+QString::number(Descriptor)+": "+QString().fromUtf8(data)+"\n"+ontvangen->toPlainText());
 }
 
 void client::set_folder_crt()
